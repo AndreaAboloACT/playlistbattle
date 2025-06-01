@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Playlist Battle - Vote for Your Favorite!</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/js/all.min.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container { max-width: 1200px; margin: 0 auto; background: rgba(255,255,255,0.95); border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.1); overflow: hidden; }
+        .header { background: linear-gradient(135deg, #ff6b6b, #feca57); padding: 40px; text-align: center; color: white; }
+        .header h1 { font-size: 3rem; margin-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .header p { font-size: 1.2rem; opacity: 0.9; }
+        .main-content { padding: 40px; }
+        .tabs { display: flex; border-bottom: 3px solid #f1f2f6; margin-bottom: 30px; }
+        .tab { flex: 1; padding: 15px 20px; background: none; border: none; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: all 0.3s ease; border-bottom: 3px solid transparent; }
+        .tab.active { color: #667eea; border-bottom-color: #667eea; }
+        .tab:hover { background: rgba(102, 126, 234, 0.1); }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .submit-form { background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 30px; border-radius: 15px; margin-bottom: 30px; }
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #2c3e50; }
+        input[type="text"], input[type="url"] { width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 10px; font-size: 1rem; transition: border-color 0.3s ease; }
+        input[type="text"]:focus, input[type="url"]:focus { outline: none; border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1); }
+        .submit-btn { background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 15px 30px; border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600; cursor: pointer; transition: transform 0.3s ease; width: 100%; }
+        .submit-btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3); }
+        .submit-btn:disabled { opacity: 0.6; transform: none; cursor: not-allowed; }
+        .playlist-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(350px, 1fr)); gap: 25px; margin-top: 30px; }
+        .playlist-card { background: white; border-radius: 15px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); transition: all 0.3s ease; border: 2px solid transparent; }
+        .playlist-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0,0,0,0.15); }
+        .playlist-card.winner { border-color: #f1c40f; background: linear-gradient(135deg, #fff, #fefcf3); }
+        .playlist-header { display: flex; align-items: center; margin-bottom: 20px; }
+        .playlist-icon { background: linear-gradient(135deg, #ff6b6b, #feca57); color: white; width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 1.2rem; }
+        .playlist-title { font-size: 1.3rem; font-weight: 700; color: #2c3e50; margin-bottom: 5px; }
+        .playlist-platform { font-size: 0.9rem; color: #7f8c8d; text-transform: uppercase; font-weight: 600; }
+        .vote-section { display: flex; align-items: center; justify-content: space-between; margin-top: 20px; padding-top: 20px; border-top: 1px solid #ecf0f1; }
+        .vote-btn { background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
+        .vote-btn:hover { transform: scale(1.05); box-shadow: 0 5px 15px rgba(46,204,113,0.3); }
+        .vote-btn.voted { background: linear-gradient(135deg, #e74c3c, #c0392b); }
+        .vote-count { background: #ecf0f1; padding: 10px 15px; border-radius: 20px; font-weight: 700; color: #2c3e50; }
+        .progress-bar { width: 100%; height: 8px; background: #ecf0f1; border-radius: 4px; margin-top: 15px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(135deg, #667eea, #764ba2); border-radius: 4px; transition: width 0.5s ease; }
+        .playlist-link { color: #667eea; text-decoration: none; font-weight: 600; display: inline-flex; align-items: center; gap: 5px; margin-top: 10px; }
+        .playlist-link:hover { text-decoration: underline; }
+        .empty-state { text-align: center; padding: 60px 20px; color: #7f8c8d; }
+        .empty-state i { font-size: 4rem; margin-bottom: 20px; opacity: 0.5; }
+        .stats { display: flex; justify-content: space-around; background: linear-gradient(135deg, #f8f9fa, #e9ecef); padding: 20px; border-radius: 15px; margin-bottom: 30px; }
+        .stat { text-align: center; }
+        .stat-number { font-size: 2rem; font-weight: 700; color: #667eea; }
+        .stat-label { color: #7f8c8d; font-weight: 600; }
+        .save-btn, .load-btn { background: linear-gradient(135deg, #3498db, #2980b9); color: white; border: none; padding: 12px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; margin: 0 10px; transition: all 0.3s ease; }
+        .save-btn:hover, .load-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(52,152,219,0.3); }
+        .data-info { background: #e8f4f8; border: 2px solid #3498db; padding: 15px; border-radius: 10px; margin-top: 15px; color: #2c3e50; }
+        .data-info h4 { margin-bottom: 10px; color: #3498db; }
+        .leader-badge { background: linear-gradient(135deg, #f1c40f, #f39c12); color: white; padding: 5px 10px; border-radius: 15px; font-size: 0.8rem; font-weight: 600; margin-bottom: 15px; text-align: center; display: flex; align-items: center; justify-content: center; gap: 5px; }
+        .loading { opacity: 0.7; transition: opacity 0.3s ease; }
+        .success-message { background: linear-gradient(135deg, #2ecc71, #27ae60); color: white; padding: 15px; border-radius: 10px; margin-top: 15px; text-align: center; font-weight: 600; display: none; }
+        @keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+        .new-submission { animation: pulse 0.6s ease-in-out; }
+    </style>
+</head>
+<body>
+    <!-- ...the rest of your HTML remains unchanged... -->
+    <!-- See your original provided code above for full content -->
+</body>
+</html>
